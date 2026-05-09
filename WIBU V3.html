@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+    <title>WIBU BUG - Expired Date System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            background: #0a1628;
+            color: #d4e4fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 800px;
+            background: linear-gradient(145deg, #0d1f3c 0%, #07142a 100%);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+            padding-bottom: 70px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Landing Page */
+        .landing-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+        .logo-area {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .logo-area h1 {
+            font-size: 28px;
+            color: #4a9eff;
+            margin-top: 20px;
+        }
+        .logo-area p {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .landing-img {
+            width: 150px;
+            height: 150px;
+            background: #1a2a4a;
+            border-radius: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            border: 2px solid #4a9eff;
+            overflow: hidden;
+        }
+        .landing-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .button-group {
+            width: 100%;
+            padding: 0 20px;
+        }
+        .landing-btn {
+            width: 100%;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 60px;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .landing-btn:active { transform: scale(0.97); }
+        .btn-get { background: #4a9eff; color: #051a2a; }
+        .btn-login { background: transparent; color: #4a9eff; border: 1px solid #4a9eff; }
+        .footer-text { text-align: center; margin-top: 40px; font-size: 10px; opacity: 0.5; }
+
+        /* Video Splash - Durasi 21 Detik */
+        .video-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            background: #000000;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .video-splash video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .skip-btn {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid #4a9eff;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+        }
+        .skip-btn:active { transform: translateX(-50%) scale(0.95); }
+        .loading-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2001;
+        }
+        .loading-ring {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top: 3px solid #4a9eff;
+            border-right: 3px solid #2a6edf;
+            border-radius: 50%;
+            animation: ringSpin 1.2s linear infinite;
+        }
+        .ring:nth-child(2) { 
+            width: 80%; height: 80%; top: 10%; left: 10%; 
+            border-top: 2px solid #2a6edf; border-right: 2px solid #4a9eff; 
+            animation: ringSpinReverse 1.5s linear infinite; 
+        }
+        @keyframes ringSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes ringSpinReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+
+        /* Chat Modal */
+        .chat-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #07142a;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: #0d1f3c;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #4a9eff;
+        }
+        .chat-header h3 { color: #4a9eff; }
+        .close-chat {
+            background: none;
+            border: none;
+            color: #4a9eff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: auto;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+        .chat-message.owner {
+            background: #1a2a4a;
+            color: #d4e4fc;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+        .chat-message.user {
+            background: #4a9eff;
+            color: #051a2a;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 12px;
+            background: #0d1f3c;
+            border-top: 1px solid #4a9eff30;
+            gap: 10px;
+        }
+        .chat-input-area input {
+            flex: 1;
+            margin: 0;
+            padding: 12px;
+            font-size: 14px;
+            border-radius: 44px;
+            border: none;
+            background: #1a2a4a;
+            color: white;
+        }
+        .chat-input-area button {
+            width: auto;
+            padding: 12px 20px;
+            margin: 0;
+            border-radius: 44px;
+            background: #4a9eff;
+            color: #051a2a;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Group Chat */
+        .group-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .group-message {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 13px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        .group-message-owner {
+            background: #1a2a4a;
+            color: #d4e4fc;
+            align-self: flex-start;
+        }
+        .group-message-other {
+            background: #0f2540;
+            color: #d4e4fc;
+            align-self: flex-start;
+        }
+        .group-message-user {
+            background: #4a9eff;
+            color: #051a2a;
+            align-self: flex-end;
+        }
+        .message-sender {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: #07142a;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 8px 6px 18px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            gap: 2px;
+            overflow-x: auto;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #6e9fca;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+        .nav-item:active { transform: scale(0.96); background: #1a2a4a; }
+        .nav-item.active { color: #4a9eff; background: #1a2a4a; }
+        .nav-icon { font-size: 18px; }
+
+        .card {
+            background: #0d1f3cdd;
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 16px;
+            border: 1px solid #4a9eff40;
+        }
+        .card h3, .card h4 { color: #4a9eff; margin-bottom: 12px; font-size: 18px; }
+
+        input, select, button {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 8px 0;
+            border-radius: 44px;
+            border: none;
+            background: #1a2a4a;
+            color: white;
+            font-size: 14px;
+        }
+        button {
+            background: #4a9eff;
+            font-weight: bold;
+            color: #051a2a;
+            cursor: pointer;
+        }
+        button:active { transform: scale(0.97); }
+        button.danger { background: #d32f2f; color: white; }
+        button.secondary { background: #2a4a6a; color: white; }
+
+        /* Gambar dan Video 4x2 */
+        .gambar-home, .gambar-bug {
+            width: 100%;
+            aspect-ratio: 4 / 2;
+            object-fit: cover;
+            border-radius: 16px;
+            margin: 12px 0;
+            border: 1px solid #4a9eff;
+        }
+        .gambar-login {
+            width: 100%;
+            border-radius: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #4a9eff;
+        }
+
+        .alert-success {
+            background: #4a9eff30;
+            border: 1px solid #4a9eff;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .alert-danger {
+            background: #d32f2f30;
+            border: 1px solid #d32f2f;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .sender-list, .user-list { max-height: 250px; overflow-y: auto; }
+        .sender-item, .user-item {
+            background: #0f2540;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .sender-actions { display: flex; gap: 8px; }
+        .sender-actions button { width: auto; padding: 6px 12px; margin: 0; font-size: 11px; }
+
+        .bugs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .bug-btn {
+            background: #1a2a4a;
+            border-radius: 60px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #4a9eff40;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .tools-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .tool-btn {
+            background: #1a2a4a;
+            border-radius: 60px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border: 1px solid #4a9eff40;
+        }
+        .tool-icon { font-size: 28px; }
+        .tool-info { flex: 1; }
+        .tool-title { font-weight: bold; font-size: 14px; }
+        .tool-desc { font-size: 10px; opacity: 0.7; }
+
+        .sholat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .sholat-item {
+            background: #0f2540;
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+        .sholat-time { font-size: 14px; font-weight: bold; color: #4a9eff; }
+
+        /* Anime API Styles */
+        .anime-search-area {
+            margin-bottom: 15px;
+        }
+        .anime-results {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .anime-result-item {
+            background: #0f2540;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 1px solid #4a9eff40;
+        }
+        .anime-result-title {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .anime-result-info {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        .episode-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .episode-btn {
+            background: #1a2a4a;
+            border-radius: 40px;
+            padding: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 11px;
+            border: 1px solid #4a9eff40;
+        }
+        .episode-btn:active { background: #2a4a6a; }
+        .video-player {
+            width: 100%;
+            height: 250px;
+            background: #000;
+            border-radius: 16px;
+            margin: 10px 0;
+        }
+        .video-player iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            border: none;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #1a2a4a;
+            border-top: 4px solid #4a9eff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        /* Quran Styles */
+        .surah-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .surah-item {
+            background: #0f2540;
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid #4a9eff40;
+        }
+        .surah-number { font-size: 12px; color: #4a9eff; width: 35px; font-weight: bold; }
+        .surah-name { flex: 1; font-weight: bold; font-size: 14px; }
+        .surah-info { font-size: 10px; opacity: 0.7; }
+        
+        .ayat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .ayat-card {
+            background: #0a1a30;
+            border-radius: 16px;
+            padding: 15px;
+            border-right: 3px solid #4a9eff;
+            margin-bottom: 8px;
+        }
+        .ayat-number { font-size: 12px; color: #4a9eff; margin-bottom: 8px; font-weight: bold; }
+        .ayat-arabic { font-size: 20px; line-height: 1.6; text-align: right; font-family: 'Amiri', serif; margin-bottom: 12px; }
+        .ayat-latin { font-size: 14px; color: #c8e0fc; margin-bottom: 8px; font-style: italic; }
+        .ayat-arti { font-size: 13px; color: #a5c8f0; border-top: 1px solid #4a9eff40; padding-top: 10px; margin-top: 8px; }
+
+        .role-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #06122a80;
+            border-radius: 40px;
+            margin: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .badge {
+            background: #4a9eff20;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            border-left: 2px solid #4a9eff;
+        }
+
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #1a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            border: 2px solid #4a9eff;
+            margin-right: 12px;
+            overflow: hidden;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-avatar.large {
+            width: 80px;
+            height: 80px;
+            font-size: 40px;
+        }
+        .bug-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #0f2540;
+            border-radius: 16px;
+        }
+        .username-display {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .expired-date {
+            font-size: 11px;
+            color: #ffaaaa;
+            margin-top: 4px;
+        }
+
+        .developer-footer {
+            text-align: center;
+            padding: 12px 0;
+            font-size: 10px;
+            color: #4a9eff80;
+            border-top: 1px solid #4a9eff20;
+            margin-top: 8px;
+        }
+        .developer-footer span { font-weight: bold; color: #4a9eff; }
+        .login-footer { text-align: center; margin-top: 20px; font-size: 11px; color: #4a9eff80; }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .chat-room-item {
+            background: #0f2540;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 1px solid #4a9eff40;
+        }
+
+        .avatar-option {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #1a2a4a;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .avatar-option.selected {
+            border-color: #4a9eff;
+            transform: scale(1.05);
+        }
+
+        .file-input-label {
+            background: #4a9eff;
+            color: #051a2a;
+            padding: 12px 20px;
+            border-radius: 44px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            display: inline-block;
+            width: 100%;
+            margin: 8px 0;
+        }
+        .file-input-label input {
+            display: none;
+        }
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #1a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            border: 2px solid #4a9eff;
+            overflow: hidden;
+        }
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Date input styling */
+        input[type="date"] {
+            color-scheme: dark;
+        }
+        .date-note {
+            font-size: 11px;
+            color: #4a9eff80;
+            margin-top: 5px;
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .bottom-nav { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+</head>
+<body>
+<div class="app-container" id="app"></div>
+
+<script>
+    // ==================== DATABASE ====================
+    let usersDB = [
+        { id: 1, username: "WibuMaster", password: "wibu123", role: "owner", createdBy: "system", duration: "permanen", expiredDate: null, avatar: "👑" },
+        { id: 2, username: "otaku_sejati", password: "otaku123", role: "tangan_kanan", createdBy: "WibuMaster", duration: "permanen", expiredDate: null, avatar: "🤝" },
+        { id: 3, username: "weeb_king", password: "weeb123", role: "vip", createdBy: "WibuMaster", duration: "30 hari", expiredDate: "2025-06-20", avatar: "⭐" },
+        { id: 4, username: "anime_lover", password: "anime123", role: "member", createdBy: "WibuMaster", duration: "7 hari", expiredDate: "2025-05-20", avatar: "👤" },
+        { id: 5, username: "reseller_anime", password: "reseller123", role: "reseller", createdBy: "WibuMaster", duration: "permanen", expiredDate: null, avatar: "📦" }
+    ];
+    let nextId = 6;
+    let sendersDB = [
+        { id: 1, nomor: "6281234567890", nama: "Sender Utama", aktif: true },
+        { id: 2, nomor: "6289876543210", nama: "Sender Backup", aktif: true }
+    ];
+    let nextSenderId = 3;
+    let currentUser = null;
+    let showVideoSplash = false;
+
+    const avatarOptions = ["👑", "🤝", "⭐", "👤", "📦", "😀", "😎", "🥷", "🦸", "🐱", "🐶", "🦊", "🐼", "🌸", "🌟", "💎", "⚡", "🔥", "💧", "🌿"];
+
+    // ==================== EXPIRED DATE FUNCTIONS ====================
+    function parseDateString(dateString) {
+        // Format: YYYY-MM-DD (dari input date)
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return null;
+        return date;
+    }
+
+    function isExpired(expiredDate) {
+        if (!expiredDate) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const expired = new Date(expiredDate);
+        expired.setHours(0, 0, 0, 0);
+        return expired < today;
+    }
+
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "-";
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    // Auto hapus akun expired
+    function checkAndDeleteExpiredAccounts() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const beforeCount = usersDB.length;
+        
+        usersDB = usersDB.filter(user => {
+            if (user.expiredDate) {
+                const expired = new Date(user.expiredDate);
+                expired.setHours(0, 0, 0, 0);
+                if (expired < today) {
+                    console.log(`Akun ${user.username} (${user.role}) expired dan dihapus otomatis`);
+                    return false;
+                }
+            }
+            return true;
+        });
+        
+        // Jika current user expired, logout
+        if (currentUser && isExpired(currentUser.expiredDate)) {
+            currentUser = null;
+            return true; // perlu redirect ke landing
+        }
+        return false;
+    }
+
+    // Panggil setiap kali mount dan setiap 1 menit
+    setInterval(() => {
+        const needRedirect = checkAndDeleteExpiredAccounts();
+        if (needRedirect && window.app && window.app.currentView !== 'landing') {
+            window.app.currentView = 'landing';
+            window.app.$forceUpdate();
+        }
+    }, 60000);
+
+    // ==================== CHAT SYSTEM ====================
+    let privateChats = [];
+    let groupMessages = [];
+    
+    function initGroupChat() {
+        if (groupMessages.length === 0) {
+            groupMessages.push({ from: "system", role: "system", text: "Selamat datang di GRUB WIBU BUG! Semua wibu bisa chat di sini.", time: new Date() });
+            groupMessages.push({ from: "WibuMaster", role: "owner", text: "Selamat datang para wibu! Selamat bergabung di grub WIBU BUG", time: new Date() });
+        }
+    }
+    initGroupChat();
+    
+    function getOrCreatePrivateChat(userId, username) {
+        let chat = privateChats.find(c => c.userId === userId);
+        if (!chat) {
+            chat = {
+                userId: userId,
+                username: username,
+                messages: [{ from: "owner", text: "Halo Wibu! Ada yang bisa saya bantu? Silakan tanyakan tentang akses WIBU BUG", time: new Date() }]
+            };
+            privateChats.push(chat);
+        }
+        return chat;
+    }
+    
+    let guestChatMessages = [
+        { from: "owner", text: "Wahai para wibu! Selamat datang di WIBU BUG. Ada yang bisa dibantu?", time: new Date() }
+    ];
+
+    // ==================== 8 MODE BUG ====================
+    const bugModes = [
+        { name: "Invis Force Close", value: "invis_force" },
+        { name: "Crash Delay", value: "crash_delay" },
+        { name: "Crash Invis", value: "crash_invis" },
+        { name: "Blank Python", value: "blank_python" },
+        { name: "Blank DC Update", value: "blank_dc" },
+        { name: "Super Delay", value: "super_delay" },
+        { name: "Suxrat V13", value: "suxrat" },
+        { name: "Wibu Bug V18", value: "wibu_v18" }
+    ];
+
+    // ==================== DATA SURAH LENGKAP ====================
+    const surahList = [
+        { number: 1, name: "Al-Fatihah", nameId: "Pembukaan", totalVerses: 7, place: "Mekkah" },
+        { number: 2, name: "Al-Baqarah", nameId: "Sapi Betina", totalVerses: 286, place: "Madinah" },
+        { number: 3, name: "Ali 'Imran", nameId: "Keluarga Imran", totalVerses: 200, place: "Madinah" },
+        { number: 4, name: "An-Nisa'", nameId: "Wanita", totalVerses: 176, place: "Madinah" },
+        { number: 5, name: "Al-Ma'idah", nameId: "Jamuan", totalVerses: 120, place: "Madinah" },
+        { number: 114, name: "An-Nas", nameId: "Manusia", totalVerses: 6, place: "Mekkah" }
+    ];
+    
+    for (let i = 6; i <= 113; i++) {
+        surahList.push({ number: i, name: `Surah ${i}`, nameId: `Surah ${i}`, totalVerses: 10, place: "Mekkah" });
+    }
+
+    // ==================== LANDING PAGE ====================
+    Vue.component('landing-page', {
+        template: `
+            <div class="landing-container">
+                <div class="logo-area">
+                    <div class="landing-img">
+                        <img src="MFG.png" onerror="this.src='https://placehold.co/150x150/1a2a4a/4a9eff?text=MFG'">
+                    </div>
+                    <h1>WIBU BUG</h1>
+                    <p>Premium WhatsApp Bug Tool for Wibu</p>
+                </div>
+                <div class="button-group">
+                    <button class="landing-btn btn-get" @click="getAccess">GET ACCESS</button>
+                    <button class="landing-btn btn-login" @click="goToLogin">LOGIN</button>
+                </div>
+                <div class="footer-text">Developed by LANZY</div>
+            </div>
+        `,
+        methods: {
+            getAccess() { this.$emit('get-access'); },
+            goToLogin() { this.$emit('go-to-login'); }
+        }
+    });
+
+    // ==================== CHAT GUEST ====================
+    Vue.component('chat-guest', {
+        template: `
+            <div class="chat-modal">
+                <div class="chat-header">
+                    <h3>Chat dengan Owner - WibuMaster</h3>
+                    <button class="close-chat" @click="closeChat">✕</button>
+                </div>
+                <div class="chat-messages" ref="chatMessages">
+                    <div v-for="(msg, idx) in messages" :key="idx" :class="['chat-message', msg.from === 'owner' ? 'owner' : 'user']">
+                        <strong>{{ msg.from === 'owner' ? 'Owner' : 'Anda' }}:</strong> {{ msg.text }}
+                        <div style="font-size:10px;">{{ formatTime(msg.time) }}</div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" v-model="newMessage" placeholder="Tulis pesan ke Owner..." @keyup.enter="sendMessage">
+                    <button @click="sendMessage">Kirim</button>
+                </div>
+            </div>
+        `,
+        data() { return { messages: guestChatMessages, newMessage: "" } },
+        mounted() { this.scrollToBottom(); },
+        methods: {
+            formatTime(date) { if (!date) return ""; const d = new Date(date); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; },
+            scrollToBottom() { this.$nextTick(() => { if (this.$refs.chatMessages) { this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight; } }); },
+            sendMessage() {
+                if (!this.newMessage.trim()) return;
+                this.messages.push({ from: "user", text: this.newMessage, time: new Date() });
+                this.scrollToBottom();
+                this.newMessage = "";
+                setTimeout(() => {
+                    this.messages.push({ from: "owner", text: "Sabar owner lagi marathon anime, nanti dibalas ya! Terima kasih wibu!", time: new Date() });
+                    this.scrollToBottom();
+                }, 1500);
+            },
+            closeChat() { this.$emit('close'); }
+        },
+        updated() { this.scrollToBottom(); }
+    });
+
+    // ==================== LOGIN PAGE ====================
+    Vue.component('login-page', {
+        template: `
+            <div style="display:flex; flex-direction:column; height:100%;">
+                <div class="main-content">
+                    <div class="card" style="text-align:center">
+                        <img src="MFG.png" class="gambar-login" onerror="this.src='https://placehold.co/400x200/1a2a4a/4a9eff?text=MFG'">
+                        <h2 style="color:#4a9eff;">WIBU BUG</h2>
+                        <p style="margin-bottom:20px;">Login ke akun wibu Anda</p>
+                        <input type="text" v-model="username" placeholder="Username">
+                        <input type="password" v-model="password" placeholder="Password">
+                        <button @click="login">MASUK</button>
+                    </div>
+                </div>
+                <div class="login-footer">Developed by LANZY</div>
+            </div>
+        `,
+        data() { return { username: '', password: '' } },
+        methods: {
+            login() {
+                const user = usersDB.find(u => u.username === this.username && u.password === this.password);
+                if (user) { 
+                    if (isExpired(user.expiredDate)) {
+                        alert("Akun Anda telah kedaluwarsa!");
+                        return;
+                    }
+                    currentUser = { ...user }; 
+                    showVideoSplash = true;
+                    this.$root.currentView = 'video-splash';
+                } else { alert("Login gagal!"); }
+            }
+        }
+    });
+
+    // ==================== VIDEO SPLASH (21 Detik) ====================
+    Vue.component('video-splash', {
+        template: `
+            <div class="video-splash">
+                <video ref="videoPlayer" autoplay muted playsinline>
+                    <source src="ZAR.mp4" type="video/mp4">
+                    Browser tidak support video tag
+                </video>
+                <div class="loading-container">
+                    <div class="loading-ring"><div class="ring"></div><div class="ring"></div></div>
+                </div>
+                <button class="skip-btn" @click="skipVideo">LEWATI</button>
+            </div>
+        `,
+        mounted() {
+            const video = this.$refs.videoPlayer;
+            if (video) {
+                video.play().catch(e => console.log("Video error, auto skip"));
+                setTimeout(() => { if(video) video.muted = false; }, 100);
+            }
+            // DURASI 21 DETIK = 21000 MILIDETIK
+            this.autoSkipTimer = setTimeout(() => { this.finishSplash(); }, 21000);
+        },
+        beforeDestroy() { if (this.autoSkipTimer) clearTimeout(this.autoSkipTimer); },
+        methods: {
+            skipVideo() { if (this.autoSkipTimer) clearTimeout(this.autoSkipTimer); this.finishSplash(); },
+            finishSplash() { showVideoSplash = false; this.$root.currentView = 'main-app'; }
+        }
+    });
+
+    // ==================== GROUP CHAT ====================
+    Vue.component('group-chat', {
+        template: `
+            <div class="chat-modal">
+                <div class="chat-header">
+                    <h3>GRUB WIBU BUG - Semua Wibu</h3>
+                    <button class="close-chat" @click="closeChat">✕</button>
+                </div>
+                <div class="group-chat-messages" ref="groupMessages">
+                    <div v-for="(msg, idx) in groupMessages" :key="idx" :class="['group-message', getMessageClass(msg)]">
+                        <div class="message-sender">{{ msg.from === currentUser.username ? 'Anda' : msg.from }} <span style="font-size:9px;">({{ getRoleName(msg.role) }})</span></div>
+                        <div>{{ msg.text }}</div>
+                        <div style="font-size:9px;">{{ formatTime(msg.time) }}</div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" v-model="newMessage" placeholder="Pesan ke grub..." @keyup.enter="sendMessage">
+                    <button @click="sendMessage">Kirim ke Grub</button>
+                </div>
+            </div>
+        `,
+        data() { return { groupMessages: groupMessages, newMessage: "" } },
+        computed: { currentUser() { return currentUser } },
+        methods: {
+            formatTime(date) { if (!date) return ""; const d = new Date(date); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; },
+            getRoleName(role) { const names = { owner: "OWNER", tangan_kanan: "TANGAN KANAN", reseller: "RESELLER", vip: "VIP", member: "MEMBER", system: "SYSTEM" }; return names[role] || role; },
+            getMessageClass(msg) { if (msg.from === currentUser.username) return 'group-message-user'; if (msg.from === 'WibuMaster' || msg.role === 'owner') return 'group-message-owner'; return 'group-message-other'; },
+            scrollToBottom() { this.$nextTick(() => { if (this.$refs.groupMessages) { this.$refs.groupMessages.scrollTop = this.$refs.groupMessages.scrollHeight; } }); },
+            sendMessage() { if (!this.newMessage.trim()) return; groupMessages.push({ from: currentUser.username, role: currentUser.role, text: this.newMessage, time: new Date() }); this.newMessage = ""; this.scrollToBottom(); },
+            closeChat() { this.$emit('close'); }
+        },
+        updated() { this.scrollToBottom(); }
+    });
+
+    // ==================== PRIVATE CHAT ====================
+    Vue.component('chat-private', {
+        template: `
+            <div class="chat-modal">
+                <div class="chat-header">
+                    <h3>Chat dengan Owner - WibuMaster</h3>
+                    <button class="close-chat" @click="closeChat">✕</button>
+                </div>
+                <div class="chat-messages" ref="chatMessages">
+                    <div v-for="(msg, idx) in messages" :key="idx" :class="['chat-message', msg.from === 'owner' ? 'owner' : 'user']">
+                        <strong>{{ msg.from === 'owner' ? 'Owner' : 'Anda' }}:</strong> {{ msg.text }}
+                        <div style="font-size:10px;">{{ formatTime(msg.time) }}</div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" v-model="newMessage" placeholder="Tulis pesan ke Owner..." @keyup.enter="sendMessage">
+                    <button @click="sendMessage">Kirim</button>
+                </div>
+            </div>
+        `,
+        data() { return { messages: [], newMessage: "" } },
+        mounted() { const chat = getOrCreatePrivateChat(currentUser.id, currentUser.username); this.messages = chat.messages; this.scrollToBottom(); },
+        methods: {
+            formatTime(date) { if (!date) return ""; const d = new Date(date); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; },
+            scrollToBottom() { this.$nextTick(() => { if (this.$refs.chatMessages) { this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight; } }); },
+            sendMessage() { if (!this.newMessage.trim()) return; const chat = getOrCreatePrivateChat(currentUser.id, currentUser.username); chat.messages.push({ from: "user", text: this.newMessage, time: new Date() }); this.messages = chat.messages; this.newMessage = ""; this.scrollToBottom(); setTimeout(() => { const chatAfter = getOrCreatePrivateChat(currentUser.id, currentUser.username); chatAfter.messages.push({ from: "owner", text: "Sabar owner lagi binge watching anime, nanti dibalas ya!", time: new Date() }); this.messages = chatAfter.messages; this.scrollToBottom(); }, 1500); },
+            closeChat() { this.$emit('close'); }
+        },
+        updated() { this.scrollToBottom(); }
+    });
+
+    // ==================== OWNER CHAT DASHBOARD ====================
+    Vue.component('chat-owner-dashboard', {
+        template: `
+            <div class="chat-modal">
+                <div class="chat-header">
+                    <h3>DASHBOARD CHAT - Owner WibuMaster</h3>
+                    <button class="close-chat" @click="closeChat">✕</button>
+                </div>
+                <div class="chat-list" v-if="!selectedChat">
+                    <div v-for="chat in privateChats" :key="chat.userId" class="chat-room-item" @click="selectChat(chat)">
+                        <div class="chat-room-name">User: {{ chat.username }}</div>
+                        <div class="chat-room-preview">{{ getLastMessage(chat) }}</div>
+                    </div>
+                    <div v-if="privateChats.length === 0" style="text-align:center; padding:20px;">Belum ada chat dari wibu</div>
+                </div>
+                <div v-if="selectedChat" style="display:flex; flex-direction:column; height:100%;">
+                    <div style="padding:15px; background:#0d1f3c; border-bottom:1px solid #4a9eff; display:flex; justify-content:space-between;">
+                        <h4>Chat dengan: {{ selectedChat.username }}</h4>
+                        <button class="secondary" style="width:auto; padding:6px 12px;" @click="selectedChat = null">Kembali</button>
+                    </div>
+                    <div class="chat-messages" ref="chatMessages" style="flex:1; overflow-y:auto; padding:15px;">
+                        <div v-for="(msg, idx) in selectedChat.messages" :key="idx" :class="['chat-message', msg.from === 'owner' ? 'owner' : 'user']">
+                            <strong>{{ msg.from === 'owner' ? 'Owner (Anda)' : selectedChat.username }}:</strong> {{ msg.text }}
+                            <div style="font-size:10px;">{{ formatTime(msg.time) }}</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" v-model="newMessage" placeholder="Ketik balasan..." @keyup.enter="sendMessage">
+                        <button @click="sendMessage">Kirim Balasan</button>
+                    </div>
+                </div>
+            </div>
+        `,
+        data() { return { privateChats: privateChats, selectedChat: null, newMessage: "" } },
+        methods: {
+            formatTime(date) { if (!date) return ""; const d = new Date(date); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; },
+            getLastMessage(chat) { const lastMsg = chat.messages[chat.messages.length - 1]; return lastMsg ? lastMsg.text.substring(0, 40) : "Tidak ada pesan"; },
+            scrollToBottom() { this.$nextTick(() => { if (this.$refs.chatMessages) { this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight; } }); },
+            selectChat(chat) { this.selectedChat = chat; this.scrollToBottom(); },
+            sendMessage() { if (!this.newMessage.trim() || !this.selectedChat) return; this.selectedChat.messages.push({ from: "owner", text: this.newMessage, time: new Date() }); this.newMessage = ""; this.scrollToBottom(); this.$forceUpdate(); },
+            closeChat() { this.$emit('close'); }
+        },
+        updated() { this.scrollToBottom(); }
+    });
+
+    // ==================== MAIN APP ====================
+    Vue.component('main-app', {
+        template: `
+            <div style="display:flex; flex-direction:column; height:100%;">
+                <div class="role-indicator">
+                    <span class="badge">{{ currentUser.username }} | {{ getRoleName(currentUser.role) }}</span>
+                    <button class="secondary" style="width:auto; padding:6px 16px;" @click="logout">Keluar</button>
+                </div>
+                <div class="main-content">
+                    <!-- HOME -->
+                    <div v-if="activeTab === 'home'">
+                        <div class="card">
+                            <img src="FFG.png" class="gambar-home" onerror="this.src='https://placehold.co/600x300/1a2a4a/4a9eff?text=FFG'">
+                            <h3>DASHBOARD WIBU</h3>
+                            <p>Selamat datang, <strong style="color:#4a9eff">{{ currentUser.username }}</strong></p>
+                            <p>Role: <strong>{{ getRoleName(currentUser.role) }}</strong></p>
+                            <p>Durasi: {{ currentUser.duration }}</p>
+                            <p>Expired Date: <strong style="color:#ffaaaa">{{ formatExpiredDateForDisplay(currentUser.expiredDate) }}</strong></p>
+                            <div v-if="isUserExpired" class="alert-danger">Peringatan: Akun wibu Anda telah kedaluwarsa!</div>
+                            <hr>
+                            <p>Akses fitur:</p>
+                            <ul style="margin-left:20px; font-size:12px;">
+                                <li>Bug WA dengan 8 Mode Pro</li>
+                                <li>Manage Sender</li>
+                                <li>Tools: Sholat, Game, HD, TikTok, Anime (API), Al-Quran, Chat Owner, Group Chat</li>
+                                <li v-if="currentUser.role !== 'member'">Game Dinosaurus, HD Upscale, Download TikTok, Nonton Anime</li>
+                                <li v-if="currentUser.role === 'tangan_kanan' || currentUser.role === 'reseller' || currentUser.role === 'owner'">Fitur Khusus: Buat Akun</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h3>MANAGE SENDER</h3>
+                            <input type="text" v-model="newSenderNomor" placeholder="Nomor WhatsApp (628xxx)">
+                            <input type="text" v-model="newSenderNama" placeholder="Nama Sender">
+                            <button @click="addSender">TAMBAH SENDER</button>
+                            <div class="sender-list">
+                                <div v-for="sender in sendersDB" :key="sender.id" class="sender-item">
+                                    <div><strong>{{ sender.nomor }}</strong><br><small>{{ sender.nama }} | {{ sender.aktif ? 'Aktif' : 'Nonaktif' }}</small></div>
+                                    <div class="sender-actions">
+                                        <button class="secondary" @click="toggleSender(sender.id)">{{ sender.aktif ? 'Nonaktif' : 'Aktif' }}</button>
+                                        <button class="danger" @click="deleteSender(sender.id)">Hapus</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BUG WA -->
+                    <div v-if="activeTab === 'bugwa'">
+                        <div class="card">
+                            <div class="bug-header">
+                                <div class="profile-avatar" v-html="getAvatarHtml()"></div>
+                                <div>
+                                    <div class="username-display">{{ currentUser.username }}</div>
+                                    <div class="expired-date">Expired: {{ formatExpiredDateForDisplay(currentUser.expiredDate) }}</div>
+                                </div>
+                            </div>
+                            <h3>WIBU BUG</h3>
+                            <video ref="bugVideo" class="gambar-bug" autoplay loop muted playsinline>
+                                <source src="WBI.mp4" type="video/mp4">
+                                Browser tidak support video tag
+                            </video>
+                            <select v-model="selectedSenderId">
+                                <option v-for="s in sendersDB" :value="s.id" :disabled="!s.aktif">{{ s.nomor }} - {{ s.nama }}</option>
+                            </select>
+                            <input type="tel" placeholder="Target Nomor (62xxx)" v-model="targetNomor">
+                            <h4 style="margin-top:12px;">8 MODE BUG PRO</h4>
+                            <div class="bugs-grid">
+                                <div v-for="bug in bugModes" :key="bug.value" class="bug-btn" @click="runBugWithLoading(bug.name)">
+                                    {{ bug.name }}
+                                </div>
+                            </div>
+                            <div v-if="lastResult" class="alert-success">{{ lastResult }}</div>
+                        </div>
+                    </div>
+
+                    <!-- TOOLS -->
+                    <div v-if="activeTab === 'tools'">
+                        <div class="card">
+                            <h3>WIBU TOOLS</h3>
+                            <div class="tools-grid">
+                                <div class="tool-btn" @click="openSubMenu('sholat')"><span class="tool-icon">🕌</span><div class="tool-info"><div class="tool-title">Jadwal Sholat</div></div>➡️</div>
+                                <div class="tool-btn" @click="openSubMenu('game')" v-if="isVipOrAbove"><span class="tool-icon">🦖</span><div class="tool-info"><div class="tool-title">Game Dinosaurus</div></div>➡️</div>
+                                <div v-else class="tool-btn" style="opacity:0.5;"><span class="tool-icon">🔒</span><div class="tool-info"><div class="tool-title">Game Dinosaurus</div></div></div>
+                                <div class="tool-btn" @click="openSubMenu('hd')" v-if="isVipOrAbove"><span class="tool-icon">✨</span><div class="tool-info"><div class="tool-title">HD Upscale</div></div>➡️</div>
+                                <div v-else class="tool-btn" style="opacity:0.5;"><span class="tool-icon">🔒</span><div class="tool-info"><div class="tool-title">HD Upscale</div></div></div>
+                                <div class="tool-btn" @click="openSubMenu('tiktok')" v-if="isVipOrAbove"><span class="tool-icon">📱</span><div class="tool-info"><div class="tool-title">Download TikTok</div></div>➡️</div>
+                                <div v-else class="tool-btn" style="opacity:0.5;"><span class="tool-icon">🔒</span><div class="tool-info"><div class="tool-title">Download TikTok</div></div></div>
+                                <div class="tool-btn" @click="openSubMenu('anime')" v-if="isVipOrAbove"><span class="tool-icon">🎬</span><div class="tool-info"><div class="tool-title">Nonton Anime (API)</div><div class="tool-desc">Streaming via Otakudesu</div></div>➡️</div>
+                                <div v-else class="tool-btn" style="opacity:0.5;"><span class="tool-icon">🔒</span><div class="tool-info"><div class="tool-title">Nonton Anime</div><div class="tool-desc">Khusus VIP+</div></div></div>
+                                <div class="tool-btn" @click="openSubMenu('quran')"><span class="tool-icon">📖</span><div class="tool-info"><div class="tool-title">Al-Quran Digital</div><div class="tool-desc">114 Surah Lengkap</div></div>➡️</div>
+                                <div class="tool-btn" @click="openSubMenu('chatOwner')"><span class="tool-icon">💬</span><div class="tool-info"><div class="tool-title">Chat Owner</div></div>➡️</div>
+                                <div class="tool-btn" @click="openSubMenu('groupChat')"><span class="tool-icon">👥</span><div class="tool-info"><div class="tool-title">Group Chat</div></div>➡️</div>
+                                <div class="tool-btn" @click="openSubMenu('ownerChat')" v-if="currentUser.role === 'owner'"><span class="tool-icon">📨</span><div class="tool-info"><div class="tool-title">Dashboard Chat</div></div>➡️</div>
+                            </div>
+                        </div>
+
+                        <!-- Submenu sholat, game, hd, tiktok, anime, quran, chat -->
+                        <div v-if="subMenu === 'sholat'" class="card"><h4>Jadwal Sholat</h4><input v-model="kotaSholat" placeholder="Kota"><button @click="fetchSholat">Cari</button><div v-if="sholatData" class="sholat-grid"><div v-for="(val,key) in sholatData" :key="key" class="sholat-item"><div class="sholat-name">{{ key }}</div><div class="sholat-time">{{ val }}</div></div></div><button class="secondary" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'game'" class="card"><h4>Game Dinosaurus</h4><canvas id="dinoCanvas" width="400" height="150" style="width:100%; background:#1a2a4a; border-radius:16px"></canvas><button @click="startGame">Mulai Lompat</button><p>Skor: <strong id="scoreDisplay">0</strong></p><button class="secondary" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'hd'" class="card"><h4>HD Upscale</h4><input type="file" accept="image/*" @change="handleFileUpload"><button @click="upscaleMedia">HD-kan</button><p v-if="hdResult" class="alert-success">{{ hdResult }}</p><button class="secondary" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'tiktok'" class="card"><h4>Download TikTok</h4><input v-model="tiktokUrl" placeholder="URL TikTok"><button @click="downloadTikTok">Download</button><p v-if="tiktokResult" class="alert-success">{{ tiktokResult }}</p><button class="secondary" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'anime'" class="card"><h4>NONTON ANIME (API)</h4><div class="anime-search-area"><input type="text" v-model="searchQuery" placeholder="Cari anime..." @keyup.enter="searchAnime"><button @click="searchAnime">CARI ANIME</button></div><div v-if="animeLoading" class="loading-spinner"><div class="spinner"></div><p>Mencari anime...</p></div><div v-if="!selectedAnimeDetail && searchResults.length > 0" class="anime-results"><div v-for="anime in searchResults" :key="anime.id" class="anime-result-item" @click="selectAnime(anime)"><div class="anime-result-title">{{ anime.title }}</div><div class="anime-result-info" v-if="anime.status">Status: {{ anime.status }}</div></div></div><div v-if="selectedAnimeDetail && !selectedEpisode"><button class="secondary" @click="selectedAnimeDetail=null">← Kembali</button><h4 style="text-align:center;">{{ selectedAnimeDetail.title }}</h4><div v-if="episodeLoading" class="loading-spinner"><div class="spinner"></div><p>Memuat episode...</p></div><div class="episode-list" v-else><div v-for="ep in episodeList" :key="ep.number" class="episode-btn" @click="playEpisode(ep)">Episode {{ ep.number }}</div></div></div><div v-if="selectedEpisode"><button class="secondary" @click="selectedEpisode=null">← Kembali</button><h4>{{ selectedAnimeDetail?.title }} - Episode {{ selectedEpisode.number }}</h4><div v-if="streamingLoading" class="loading-spinner"><div class="spinner"></div><p>Memuat video...</p></div><div v-else-if="streamingUrl" class="video-player"><iframe :src="streamingUrl" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe></div><div class="episode-list" style="margin-top:10px;"><div v-for="ep in episodeList.slice(0,15)" :key="ep.number" class="episode-btn" @click="playEpisode(ep)">EP {{ ep.number }}</div></div></div><button class="secondary" style="margin-top:15px;" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'quran'" class="card"><h4>AL-QURAN DIGITAL</h4><input v-model="searchSurah" placeholder="Cari surah..."><div class="surah-list" v-if="!selectedSurah"><div v-for="surah in filteredSurah" :key="surah.number" class="surah-item" @click="selectSurah(surah.number)"><div class="surah-number">{{ surah.number }}</div><div class="surah-name">{{ surah.name }}<br><small class="surah-info">{{ surah.nameId }} | {{ surah.totalVerses }} ayat</small></div><div>📖</div></div></div><div v-if="selectedSurah"><button class="secondary" @click="selectedSurah=null">← Kembali</button><h4 style="text-align:center;">{{ selectedSurahData?.name }}</h4><div class="ayat-list"><div v-for="ayat in ayatData" :key="ayat.number" class="ayat-card"><div class="ayat-number">Ayat {{ ayat.number }}</div><div class="ayat-arabic">{{ ayat.arab }}</div><div class="ayat-latin">{{ ayat.latin }}</div><div class="ayat-arti">{{ ayat.arti }}</div></div></div></div><button class="secondary" style="margin-top:15px;" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'chatOwner'" class="card"><div class="chat-messages" ref="privateChatMsgs" style="height:300px; overflow-y:auto;"><div v-for="(msg, idx) in privateMessages" :key="idx" :class="['chat-message', msg.from === 'owner' ? 'owner' : 'user']"><strong>{{ msg.from === 'owner' ? 'Owner' : 'Anda' }}:</strong> {{ msg.text }}<div style="font-size:10px;">{{ formatTime(msg.time) }}</div></div></div><div class="chat-input-area"><input type="text" v-model="newPrivateMsg" placeholder="Tulis pesan ke Owner..." @keyup.enter="sendPrivateMessage"><button @click="sendPrivateMessage">Kirim</button></div><button class="secondary" style="margin-top:15px;" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'groupChat'" class="card"><div class="group-chat-messages" ref="groupChatMsgs" style="height:350px; overflow-y:auto;"><div v-for="(msg, idx) in groupMessages" :key="idx" :class="['group-message', getGroupMessageClass(msg)]"><div class="message-sender">{{ msg.from === currentUser.username ? 'Anda' : msg.from }} <span style="font-size:9px;">({{ getRoleName(msg.role) }})</span></div><div>{{ msg.text }}</div><div style="font-size:9px;">{{ formatTime(msg.time) }}</div></div></div><div class="chat-input-area"><input type="text" v-model="newGroupMsg" placeholder="Pesan ke grub..." @keyup.enter="sendGroupMessage"><button @click="sendGroupMessage">Kirim ke Grub</button></div><button class="secondary" style="margin-top:15px;" @click="subMenu=null">Tutup</button></div>
+                        <div v-if="subMenu === 'ownerChat' && currentUser.role === 'owner'" class="card"><div class="chat-list" v-if="!selectedOwnerChat"><div v-for="chat in privateChats" :key="chat.userId" class="chat-room-item" @click="selectOwnerChat(chat)"><div class="chat-room-name">User: {{ chat.username }}</div><div class="chat-room-preview">{{ getLastMessageText(chat) }}</div></div></div><div v-if="selectedOwnerChat"><button class="secondary" @click="selectedOwnerChat=null">← Kembali</button><div class="chat-messages" ref="ownerChatMsgs" style="height:300px; overflow-y:auto;"><div v-for="(msg, idx) in selectedOwnerChat.messages" :key="idx" :class="['chat-message', msg.from === 'owner' ? 'owner' : 'user']"><strong>{{ msg.from === 'owner' ? 'Owner (Anda)' : selectedOwnerChat.username }}:</strong> {{ msg.text }}<div style="font-size:10px;">{{ formatTime(msg.time) }}</div></div></div><div class="chat-input-area"><input type="text" v-model="newOwnerReply" placeholder="Ketik balasan..." @keyup.enter="sendOwnerReply"><button @click="sendOwnerReply">Kirim Balasan</button></div></div><button class="secondary" style="margin-top:15px;" @click="subMenu=null">Tutup</button></div>
+                    </div>
+
+                    <!-- AKUN -->
+                    <div v-if="activeTab === 'account'">
+                        <div class="card">
+                            <h3>TENTANG AKUN WIBU</h3>
+                            <div class="avatar-preview" v-html="getAvatarHtmlLarge()"></div>
+                            <div style="text-align:center; margin-bottom:15px;">
+                                <label class="file-input-label">Pilih dari Gallery<input type="file" accept="image/*" @change="uploadAvatar" capture></label>
+                                <button class="secondary" style="margin-top:5px;" @click="showEmojiSelector = !showEmojiSelector">Gunakan Emoji</button>
+                            </div>
+                            <div v-if="showEmojiSelector" style="text-align:center; margin:10px 0; max-height:200px; overflow-y:auto;"><div v-for="emoji in avatarOptions" :key="emoji" class="avatar-option" :class="{selected: currentUser.avatar === emoji && !isImageAvatar}" @click="selectEmoji(emoji)" style="display:inline-flex;"><span style="font-size:30px;">{{ emoji }}</span></div></div>
+                            <p><strong>Username:</strong> {{ currentUser.username }}</p>
+                            <p><strong>Role:</strong> {{ getRoleName(currentUser.role) }}</p>
+                            <p><strong>Durasi:</strong> {{ currentUser.duration }}</p>
+                            <p><strong>Tanggal Expired:</strong> {{ formatExpiredDateForDisplay(currentUser.expiredDate) }}</p>
+                            <div v-if="isUserExpired" class="alert-danger">Akun wibu Anda telah kedaluwarsa! Silakan perpanjang.</div>
+                            <hr>
+                            <button class="danger" @click="logout" style="margin-top:10px;">GANTI AKUN (LOGOUT)</button>
+                        </div>
+                    </div>
+
+                    <!-- FITUR KHUSUS dengan input tanggal manual -->
+                    <div v-if="activeTab === 'fiturkhusus' && (currentUser.role === 'tangan_kanan' || currentUser.role === 'reseller' || currentUser.role === 'owner')">
+                        <div class="card"><h3>INFO AKUN WIBU</h3><div class="user-list"><div v-for="user in allUsers" :key="user.id" class="user-item"><div><strong>{{ user.username }}</strong> <span style="color:#4a9eff;">({{ getRoleName(user.role) }})</span><br><small>Durasi: {{ user.duration }} | Expired: {{ formatExpiredDateForDisplay(user.expiredDate) }}</small></div><div class="sender-actions" v-if="currentUser.role === 'owner' && user.username !== 'WibuMaster'"><button class="danger" @click="deleteAccount(user.id)">Hapus</button></div></div></div></div>
+                        <div class="card">
+                            <h3>BUAT AKUN WIBU BARU</h3>
+                            <input v-model="newUsername" placeholder="Username">
+                            <input type="password" v-model="newPassword" placeholder="Password">
+                            <select v-model="newRole">
+                                <option v-if="currentUser.role === 'owner'" value="tangan_kanan">Tangan Kanan Owner</option>
+                                <option v-if="currentUser.role === 'owner'" value="reseller">Reseller</option>
+                                <option value="vip">VIP</option>
+                                <option value="member">Member</option>
+                            </select>
+                            <select v-model="newDuration">
+                                <option v-if="currentUser.role === 'owner' || currentUser.role === 'tangan_kanan'" value="permanen">Permanen</option>
+                                <option value="30 hari">30 Hari</option>
+                                <option value="7 hari">7 Hari</option>
+                            </select>
+                            <div class="date-input-wrapper">
+                                <input type="date" v-model="newExpiredDate" placeholder="Tanggal Expired (YYYY-MM-DD)">
+                                <div class="date-note">Format: YYYY-MM-DD (contoh: 2025-12-31)</div>
+                            </div>
+                            <button @click="createAccount">BUAT AKUN</button>
+                            <p v-if="createMsg" class="alert-success">{{ createMsg }}</p>
+                        </div>
+                    </div>
+
+                    <div class="developer-footer">Developed by LANZY</div>
+                </div>
+
+                <div class="bottom-nav">
+                    <button class="nav-item" :class="{active: activeTab === 'home'}" @click="activeTab = 'home'"><span class="nav-icon">🏠</span><span>Home</span></button>
+                    <button class="nav-item" :class="{active: activeTab === 'bugwa'}" @click="activeTab = 'bugwa'"><span class="nav-icon">🐞</span><span>Bug</span></button>
+                    <button class="nav-item" :class="{active: activeTab === 'tools'}" @click="activeTab = 'tools'; subMenu=null"><span class="nav-icon">🛠️</span><span>Tools</span></button>
+                    <button class="nav-item" :class="{active: activeTab === 'account'}" @click="activeTab = 'account'"><span class="nav-icon">👤</span><span>Akun</span></button>
+                    <button class="nav-item" v-if="currentUser.role === 'tangan_kanan' || currentUser.role === 'reseller' || currentUser.role === 'owner'" :class="{active: activeTab === 'fiturkhusus'}" @click="activeTab = 'fiturkhusus'"><span class="nav-icon">👑</span><span>Fitur Khusus</span></button>
+                </div>
+                <div v-if="isLoading" class="loading-overlay"><div class="spinner"></div></div>
+            </div>
+        `,
+        data() {
+            return {
+                activeTab: 'home',
+                subMenu: null,
+                sendersDB: sendersDB,
+                bugModes: bugModes,
+                surahList: surahList,
+                targetNomor: '',
+                selectedSenderId: 1,
+                lastResult: '',
+                newSenderNomor: '',
+                newSenderNama: '',
+                kotaSholat: 'Jakarta',
+                sholatData: null,
+                loadingSholat: false,
+                sholatInfo: '',
+                tiktokUrl: '',
+                tiktokResult: '',
+                hdResult: '',
+                selectedFile: null,
+                newUsername: '',
+                newPassword: '',
+                newRole: 'vip',
+                newDuration: '30 hari',
+                newExpiredDate: '',
+                createMsg: '',
+                isLoading: false,
+                searchSurah: '',
+                selectedSurah: null,
+                selectedSurahData: null,
+                loadingAyat: false,
+                ayatData: [],
+                searchQuery: '',
+                searchResults: [],
+                searchPerformed: false,
+                animeLoading: false,
+                selectedAnimeDetail: null,
+                episodeList: [],
+                episodeLoading: false,
+                selectedEpisode: null,
+                streamingUrl: null,
+                streamingLoading: false,
+                privateMessages: [],
+                newPrivateMsg: '',
+                newGroupMsg: '',
+                selectedOwnerChat: null,
+                newOwnerReply: '',
+                privateChats: privateChats,
+                groupMessages: groupMessages,
+                showEmojiSelector: false,
+                avatarOptions: avatarOptions,
+                isImageAvatar: false
+            }
+        },
+        computed: {
+            currentUser() { return currentUser },
+            allUsers() { return usersDB },
+            isVipOrAbove() { return ['vip', 'reseller', 'tangan_kanan', 'owner'].includes(currentUser?.role); },
+            isUserExpired() { return isExpired(currentUser?.expiredDate); },
+            filteredSurah() {
+                if (!this.searchSurah) return this.surahList;
+                return this.surahList.filter(s => s.name.toLowerCase().includes(this.searchSurah.toLowerCase()) || s.nameId.toLowerCase().includes(this.searchSurah.toLowerCase()));
+            }
+        },
+        mounted() { 
+            this.fetchSholat(); 
+            this.initDinoGame();
+            this.isImageAvatar = currentUser.avatar && currentUser.avatar.startsWith('data:image');
+            this.$nextTick(() => {
+                const video = this.$refs.bugVideo;
+                if (video) {
+                    video.play().catch(e => console.log("Auto play failed:", e));
+                    setTimeout(() => { if (video) video.muted = false; }, 500);
+                }
+            });
+        },
+        methods: {
+            formatExpiredDateForDisplay(date) { return formatDateForDisplay(date); },
+            getAvatarHtml() {
+                if (currentUser.avatar && currentUser.avatar.startsWith('data:image')) {
+                    return `<img src="${currentUser.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                return `<span style="font-size:30px;">${currentUser.avatar || '👤'}</span>`;
+            },
+            getAvatarHtmlLarge() {
+                if (currentUser.avatar && currentUser.avatar.startsWith('data:image')) {
+                    return `<img src="${currentUser.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                return `<span style="font-size:50px;">${currentUser.avatar || '👤'}</span>`;
+            },
+            uploadAvatar(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const avatarData = e.target.result;
+                        currentUser.avatar = avatarData;
+                        const userIndex = usersDB.findIndex(u => u.id === currentUser.id);
+                        if (userIndex !== -1) usersDB[userIndex].avatar = avatarData;
+                        this.isImageAvatar = true;
+                        this.showEmojiSelector = false;
+                        this.$forceUpdate();
+                    };
+                    reader.readAsDataURL(file);
+                } else { alert("Silakan pilih file gambar!"); }
+            },
+            selectEmoji(emoji) {
+                currentUser.avatar = emoji;
+                const userIndex = usersDB.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) usersDB[userIndex].avatar = emoji;
+                this.isImageAvatar = false;
+                this.showEmojiSelector = false;
+                this.$forceUpdate();
+            },
+            getRoleName(role) { const names = { owner: "OWNER", tangan_kanan: "TANGAN KANAN", reseller: "RESELLER", vip: "VIP", member: "MEMBER" }; return names[role] || role; },
+            formatTime(date) { if (!date) return ""; const d = new Date(date); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; },
+            getGroupMessageClass(msg) { if (msg.from === currentUser.username) return 'group-message-user'; if (msg.from === 'WibuMaster' || msg.role === 'owner') return 'group-message-owner'; return 'group-message-other'; },
+            getLastMessageText(chat) { const lastMsg = chat.messages[chat.messages.length - 1]; return lastMsg ? lastMsg.text.substring(0, 40) : "Tidak ada pesan"; },
+            logout() { currentUser = null; this.$root.currentView = 'landing'; },
+            
+            async fetchSholat() { 
+                if (!this.kotaSholat) return; 
+                this.loadingSholat = true; 
+                try { 
+                    const res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${this.kotaSholat}&country=Indonesia&method=2`); 
+                    const data = await res.json(); 
+                    if(data.code === 200) { 
+                        const t = data.data.timings; 
+                        this.sholatData = { Imsak: t.Imsak, Subuh: t.Fajr, Dzuhur: t.Dhuhr, Ashar: t.Asr, Maghrib: t.Maghrib, Isya: t.Isha }; 
+                        this.sholatInfo = `${data.data.date.readable} - ${this.kotaSholat}`;
+                    }
+                } catch(e) { this.sholatData = null; this.sholatInfo = "Gagal, coba kota lain"; } 
+                finally { this.loadingSholat = false; } 
+            },
+            downloadTikTok() { if(!this.tiktokUrl) return this.tiktokResult = "Masukkan URL!"; this.tiktokResult = "Memproses download..."; setTimeout(()=> this.tiktokResult = "Download berhasil!", 1500); },
+            handleFileUpload(e) { this.selectedFile = e.target.files[0]; },
+            upscaleMedia() { if(!this.selectedFile) return this.hdResult = "Pilih gambar!"; this.hdResult = "Memproses HD Upscale..."; setTimeout(()=> this.hdResult = "HD berhasil!", 2000); },
+            async runBugWithLoading(bugName) {
+                if (!this.targetNomor) { this.lastResult = "Masukkan target nomor!"; return; }
+                const sender = this.sendersDB.find(s => s.id === this.selectedSenderId);
+                if (!sender || !sender.aktif) { this.lastResult = "Sender tidak aktif!"; return; }
+                this.isLoading = true;
+                await new Promise(resolve => setTimeout(resolve, 2500));
+                this.isLoading = false;
+                this.lastResult = `${bugName} berhasil dikirim ke ${this.targetNomor} via ${sender.nomor}`;
+                setTimeout(() => this.lastResult = '', 4000);
+            },
+            addSender() { if (!this.newSenderNomor || !this.newSenderNama) return alert("Isi nomor dan nama!"); this.sendersDB.push({ id: nextSenderId++, nomor: this.newSenderNomor, nama: this.newSenderNama, aktif: true }); this.newSenderNomor = ''; this.newSenderNama = ''; alert("Sender ditambahkan!"); },
+            toggleSender(id) { const s = this.sendersDB.find(s => s.id === id); if(s) s.aktif = !s.aktif; this.$forceUpdate(); },
+            deleteSender(id) { this.sendersDB = this.sendersDB.filter(s => s.id !== id); },
+            openSubMenu(menu) { 
+                this.subMenu = menu; 
+                if(menu === 'game') setTimeout(() => this.initDinoGame(), 100); 
+                if(menu === 'quran') { this.selectedSurah = null; this.ayatData = []; } 
+                if(menu === 'anime') {
+                    this.searchResults = [];
+                    this.searchQuery = '';
+                    this.searchPerformed = false;
+                    this.selectedAnimeDetail = null;
+                    this.episodeList = [];
+                    this.selectedEpisode = null;
+                }
+                if(menu === 'chatOwner') {
+                    const chat = getOrCreatePrivateChat(currentUser.id, currentUser.username);
+                    this.privateMessages = chat.messages;
+                    this.scrollToBottom('privateChatMsgs');
+                }
+                if(menu === 'groupChat') { this.scrollToBottom('groupChatMsgs'); }
+                if(menu === 'ownerChat') { this.selectedOwnerChat = null; }
+            },
+            scrollToBottom(refName) { this.$nextTick(() => { if (this.$refs[refName]) { this.$refs[refName].scrollTop = this.$refs[refName].scrollHeight; } }); },
+            async selectSurah(surahNumber) {
+                this.selectedSurah = surahNumber;
+                this.selectedSurahData = this.surahList.find(s => s.number === surahNumber);
+                this.loadingAyat = true;
+                this.ayatData = [];
+                try {
+                    const response = await fetch(`https://equran.id/api/surat/${surahNumber}`);
+                    const data = await response.json();
+                    if (data && data.ayat) {
+                        this.ayatData = data.ayat.map((ayat, index) => ({ number: index + 1, arab: ayat.ar || "", latin: ayat.tr || "", arti: ayat.idn || "" }));
+                    }
+                } catch(e) { console.error(e); }
+                this.loadingAyat = false;
+            },
+            async searchAnime() {
+                if (!this.searchQuery.trim()) { alert("Masukkan judul anime!"); return; }
+                this.animeLoading = true;
+                this.searchResults = [];
+                this.searchPerformed = true;
+                try {
+                    const response = await fetch(`https://api-santuyy.vercel.app/api/otakudesu/search?q=${encodeURIComponent(this.searchQuery)}`);
+                    const data = await response.json();
+                    if (data && data.anime && data.anime.length > 0) this.searchResults = data.anime.slice(0, 20);
+                } catch (error) { console.error(error); }
+                this.animeLoading = false;
+            },
+            async selectAnime(anime) {
+                this.selectedAnimeDetail = anime;
+                this.episodeLoading = true;
+                this.episodeList = [];
+                try {
+                    const response = await fetch(`https://api-santuyy.vercel.app/api/otakudesu/anime/${anime.endpoint}`);
+                    const data = await response.json();
+                    if (data && data.episode_list) {
+                        this.episodeList = data.episode_list.map((ep, idx) => ({ number: ep.episode || (idx + 1), endpoint: ep.endpoint }));
+                    }
+                } catch (error) { console.error(error); }
+                this.episodeLoading = false;
+            },
+            async playEpisode(episode) {
+                this.selectedEpisode = episode;
+                this.streamingLoading = true;
+                this.streamingUrl = null;
+                try {
+                    const response = await fetch(`https://api-santuyy.vercel.app/api/otakudesu/video/${episode.endpoint}`);
+                    const data = await response.json();
+                    if (data && data.video_url) this.streamingUrl = data.video_url;
+                } catch (error) { console.error(error); }
+                this.streamingLoading = false;
+            },
+            sendPrivateMessage() {
+                if (!this.newPrivateMsg.trim()) return;
+                const chat = getOrCreatePrivateChat(currentUser.id, currentUser.username);
+                chat.messages.push({ from: "user", text: this.newPrivateMsg, time: new Date() });
+                this.privateMessages = chat.messages;
+                this.newPrivateMsg = "";
+                this.scrollToBottom('privateChatMsgs');
+                setTimeout(() => {
+                    const chatAfter = getOrCreatePrivateChat(currentUser.id, currentUser.username);
+                    chatAfter.messages.push({ from: "owner", text: "Sabar owner lagi binge watching anime, nanti dibalas ya!", time: new Date() });
+                    this.privateMessages = chatAfter.messages;
+                    this.scrollToBottom('privateChatMsgs');
+                }, 1500);
+            },
+            sendGroupMessage() {
+                if (!this.newGroupMsg.trim()) return;
+                groupMessages.push({ from: currentUser.username, role: currentUser.role, text: this.newGroupMsg, time: new Date() });
+                this.newGroupMsg = "";
+                this.scrollToBottom('groupChatMsgs');
+            },
+            selectOwnerChat(chat) { this.selectedOwnerChat = chat; this.newOwnerReply = ""; this.scrollToBottom('ownerChatMsgs'); },
+            sendOwnerReply() {
+                if (!this.newOwnerReply.trim() || !this.selectedOwnerChat) return;
+                this.selectedOwnerChat.messages.push({ from: "owner", text: this.newOwnerReply, time: new Date() });
+                this.newOwnerReply = "";
+                this.scrollToBottom('ownerChatMsgs');
+                this.$forceUpdate();
+            },
+            createAccount() { 
+                if (!this.newUsername || !this.newPassword) { this.createMsg = "Isi semua field!"; return; } 
+                if (usersDB.find(u => u.username === this.newUsername)) { this.createMsg = "Username sudah ada!"; return; }
+                let expiredDate = null;
+                if (this.newDuration !== "permanen") {
+                    if (this.newExpiredDate) {
+                        expiredDate = this.newExpiredDate;
+                    } else {
+                        // otomatis hitung dari durasi
+                        const today = new Date();
+                        if (this.newDuration === "30 hari") today.setDate(today.getDate() + 30);
+                        else if (this.newDuration === "7 hari") today.setDate(today.getDate() + 7);
+                        expiredDate = today.toISOString().split('T')[0];
+                    }
+                }
+                usersDB.push({ id: nextId++, username: this.newUsername, password: this.newPassword, role: this.newRole, createdBy: this.currentUser.username, duration: this.newDuration, expiredDate: expiredDate, avatar: null });
+                this.createMsg = `Akun ${this.getRoleName(this.newRole)} berhasil dibuat! Expired: ${formatDateForDisplay(expiredDate)}`; 
+                this.newUsername = ''; this.newPassword = ''; this.newExpiredDate = '';
+                setTimeout(() => this.createMsg = '', 3000); 
+            },
+            deleteAccount(id) { 
+                const user = usersDB.find(u => u.id === id); 
+                if (!user || user.username === 'WibuMaster') return alert("Tidak bisa hapus owner!"); 
+                usersDB = usersDB.filter(u => u.id !== id); 
+                alert(`Akun ${user.username} dihapus!`); 
+            },
+            initDinoGame() { 
+                setTimeout(() => { 
+                    const canvas = document.getElementById('dinoCanvas'); 
+                    if(!canvas) return; 
+                    let ctx = canvas.getContext('2d'), jumping = false, y = 0, score = 0, obstacleX = 400, gameRunning = false, animationId, ground = 120, dinoY = ground; 
+                    const draw = () => { 
+                        ctx.clearRect(0,0,400,150); 
+                        ctx.fillStyle = '#1a2a4a'; ctx.fillRect(0,130,400,20); 
+                        ctx.fillStyle = '#4a9eff'; ctx.fillRect(30, dinoY, 20, 20); 
+                        ctx.fillStyle = '#d45a1a'; ctx.fillRect(obstacleX, ground-15, 15, 15); 
+                        ctx.fillStyle = '#4a9eff'; ctx.fillText(`Skor: ${score}`, 300, 20); 
+                        if(gameRunning) { 
+                            if(jumping) { y += 3; dinoY = ground - y; if(dinoY >= ground) { dinoY = ground; jumping = false; y = 0; } } 
+                            obstacleX -= 3; 
+                            if(obstacleX < 0) { obstacleX = 400; score++; document.getElementById('scoreDisplay').innerText = score; } 
+                            if(obstacleX < 50 && obstacleX+15 > 30 && dinoY+20 > ground-15) { gameRunning = false; alert("Game Over! Skor: "+score); resetGame(); return; } 
+                        } 
+                        animationId = requestAnimationFrame(draw); 
+                    }; 
+                    window.startGame = () => { if(!gameRunning) { gameRunning = true; score = 0; obstacleX = 400; dinoY = ground; jumping = false; y = 0; document.getElementById('scoreDisplay').innerText = 0; draw(); } }; 
+                    window.addEventListener('keydown', (e) => { if(e.code === 'Space' && gameRunning && !jumping) { e.preventDefault(); jumping = true; y = 12; } }); 
+                    canvas.addEventListener('click', () => { if(gameRunning && !jumping) { jumping = true; y = 12; } }); 
+                    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(gameRunning && !jumping) { jumping = true; y = 12; } }); 
+                    this.startGame = window.startGame; 
+                    const resetGame = () => { gameRunning = false; cancelAnimationFrame(animationId); this.startGame(); }; 
+                }, 100); 
+            },
+            startGame() { if(window.startGame) window.startGame(); }
+        },
+        updated() { if(this.activeTab === 'tools' && this.subMenu === 'game') this.initDinoGame(); }
+    });
+
+    // ==================== VUE INSTANCE ====================
+    const app = new Vue({
+        el: '#app',
+        data: { 
+            currentView: 'landing', 
+            showGuestChat: false
+        },
+        render(h) {
+            if (this.currentView === 'landing') {
+                return h('landing-page', {
+                    on: {
+                        'get-access': () => { this.showGuestChat = true; this.currentView = 'guest-chat'; this.$forceUpdate(); },
+                        'go-to-login': () => { this.currentView = 'login'; this.$forceUpdate(); }
+                    }
+                });
+            }
+            if (this.currentView === 'guest-chat' && this.showGuestChat) {
+                return h('chat-guest', { on: { close: () => { this.showGuestChat = false; this.currentView = 'landing'; this.$forceUpdate(); } } });
+            }
+            if (this.currentView === 'login') return h('login-page');
+            if (this.currentView === 'video-splash') return h('video-splash');
+            if (this.currentView === 'main-app' && currentUser) return h('main-app');
+            return h('landing-page');
+        }
+    });
+    
+    window.app = app;
+</script>
+</body>
+</html>
